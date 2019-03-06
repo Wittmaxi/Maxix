@@ -12,11 +12,19 @@ namespace MEM {
 
     void* allocate(size_t size, landmark* owner = nullptr) {
         landmark_iterator it(entry);
-        landmark* before;
-        while (!(it.has_enough_space_after(size))) {
-            before = (*it);
+        while (!(*it)->has_enough_space_after(size))
             it++;
-        } 
-        (*it)->create_landmark_after(size, owner);
+        return (*it)->create_landmark_after(size, owner);
+    }
+
+    void deallocate(void* pointer) {
+        landmark_iterator to_find(reinterpret_cast<landmark*> (pointer));
+        landmark_iterator it(entry);
+        landmark* before;
+        while (it != to_find) {
+            before = (*it);
+            it++; 
+        }
+        before->next = it->next;
     }
 }

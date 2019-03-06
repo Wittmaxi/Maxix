@@ -4,11 +4,16 @@
 namespace MEM {
     struct landmark {
         landmark* create_landmark_after(size_t distance, landmark* pp) {
-            landmark* created = reinterpret_cast<landmark*> (this + distance);
+            landmark* created = reinterpret_cast<landmark*> (this + distance + sizeof(landmark));
             created->next = next;
             created->parent_pointer = pp;
             next = created;
             return created;
+        }
+        bool has_enough_space_after(size_t space) {
+            if (space <= reinterpret_cast<int> (next) - reinterpret_cast<int> (this))
+                return true;
+            return false;
         }
         landmark* parent_pointer;
         landmark* next;
@@ -32,10 +37,8 @@ namespace MEM {
             return position;
         }
 
-        bool has_enough_space_after(size_t space) {
-            if (space <= reinterpret_cast<int> (position->next) - reinterpret_cast<int> (position))
-                return true;
-            return false;
+        landmark* operator->() {
+            return position;
         }
 
         bool operator== (const landmark_iterator& other) {
