@@ -1,0 +1,3 @@
+.build/apps/clinl.iso
+*.o
+*.bin
