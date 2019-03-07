@@ -12,9 +12,20 @@ namespace MEM {
 
     void* allocate(size_t size, landmark* owner = nullptr) {
         landmark_iterator it(entry);
-        while (!(*it)->has_enough_space_after(size))
+        while ((!it->has_enough_space_after(size)) || (it->used))
             it++;
-        return (*it)->create_landmark_after(size, owner);
+        return it->create_landmark_after(size, owner);
+    }
+
+    void defragment (landmark_iterator before, landmark_iterator it) {
+        if (it->used)
+            return;
+        if (!before->used) {
+            before->next = it->next;
+            it = before;
+        }
+        if (!it->next->used)
+            it->next = it->next->next;
     }
 
     void deallocate(void* pointer) {
@@ -25,6 +36,7 @@ namespace MEM {
             before = (*it);
             it++; 
         }
-        before->next = it->next;
+        it->used = false;
+        defragment(before, it);
     }
 }

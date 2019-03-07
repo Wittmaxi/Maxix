@@ -7,6 +7,7 @@ namespace MEM {
             landmark* created = reinterpret_cast<landmark*> (this + distance + sizeof(landmark));
             created->next = next;
             created->parent_pointer = pp;
+            created->used = false;
             next = created;
             return created;
         }
@@ -17,6 +18,7 @@ namespace MEM {
         }
         landmark* parent_pointer;
         landmark* next;
+        bool used;
     }__attribute__((packed));
 
     struct landmark_iterator {
@@ -58,6 +60,7 @@ namespace MEM {
         landmark* landmark_ptr = reinterpret_cast<landmark*> (at);
         landmark_ptr->next = reinterpret_cast<landmark*> (next);
         landmark_ptr->parent_pointer = reinterpret_cast<landmark*> (parent);
+        landmark_ptr->used = false;
         return landmark_ptr;
     }
 }
