@@ -44,12 +44,69 @@ entry:
 farjump_label:
     push cs
     pop ds
-    push dl
-    mov eax, WORD[reserved_sectors]
-    add eax, WORD[hidden_sectors]
-    add eax, 2
-    ; the first FAT is at segment eax
-    mov eax, ebx
-    mov ecx, WORD[sectors_per_fat]
-    mul ecx, BYTE[number_fats]
-    add ebx, ecx 
+    push dx
+    mov ax, WORD[reserved_sectors]
+    add ax, WORD[hidden_sectors]
+    inc ax
+    mov cx, ax
+    ;
+    mov ax, WORD[sectors_per_fat]
+    mul BYTE[number_fats]
+    add ax, cx
+    mov bx, ax
+    ;
+    mov ax,32
+    mul [root_dir_entries]
+    div dx, WORD[bytes_per_sector]
+    ;
+    mov ah, 02
+    mov al, bl
+    int 13h
+    ;dx = data
+    ;bx = root
+    ;cx = fat
+
+
+set_esbx:
+mov bx,7f0h
+mov es, bx
+xor bx,bx
+ret
+
+read_seg: ;ax = segment to read
+mov di,5 ; times we'll retry on disk I/O error
+retry: div word [sectors_per_track]
+mov cx,dx
+inc cx
+xor dx,dx
+div word [heads]
+mov dh, dl
+mov ch, al
+push cx
+mov cl, 6
+shr ah, cl
+pop cx
+or cl, ah
+mov ah, 0201h
+int 13h
+jnc sectordone
+dec di
+jnz retry
+mov al, cant_read_disk
+display: lodsb ; AL=DS:[SI], increments SI by 1
+mov ah,0eh
+mov bx,7
+int 10h
+or al,al
+jnz display
+xor ax,ax
+int 16h ; Keyboard interrupt / Wait for a key
+int 19h ; re-enter the BIOS BSS bootstrap
+
+sectordone:
+ret
+
+
+
+.data: 
+    cant_read_disk: db "the Maxix bootloader wasn't able to read your Disk", 0h

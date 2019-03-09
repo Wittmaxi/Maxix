@@ -26,7 +26,7 @@ dir:
 kernel: dir
 	@mkdir -p $(@D)
 	$(ASM) assets/*.s -o $(OBJ_DIR)/asm1.o
-	#nasm assets/*.asm -f elf -o $(OBJ_DIR)/asm2.o
+	nasm assets/boot_sector.asm -f elf -o $(OBJ_DIR)/boostrap.o
 	$(CXX) -nostdlib $(CXXFLAGS) $(INCLUDE) -c src/*.cpp
 	$(CXX) -nostdlib $(CXXFLAGS) $(INCLUDE) -c src/lib/*.cpp
 	mv ./*.o $(OBJ_DIR)
